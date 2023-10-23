@@ -22,13 +22,15 @@ public abstract class DatabaseDetailsRepository {
 
     abstract List<DatabaseSchema> filterSchemas(List<DatabaseSchema> schemas);
 
+    abstract List<String> queryRoles(Connection connection);
+
     public DatabaseDetails getDetails() {
         try (Connection connection = dataSource.getConnection()) {
             DatabaseMetaData metadata = connection.getMetaData();
             return DatabaseDetails.builder()
                 .dbms(DBMS.forName(metadata.getDatabaseProductName()))
                 .version(metadata.getDatabaseProductVersion())
-                .users(List.of("luis", "pedro"))
+                .users(queryRoles(connection))
                 .schemas(filterSchemas(querySchemas(metadata)))
                 .build();
         } catch (SQLException e) {

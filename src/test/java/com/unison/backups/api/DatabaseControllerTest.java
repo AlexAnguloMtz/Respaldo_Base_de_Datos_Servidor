@@ -41,7 +41,7 @@ public class DatabaseControllerTest {
             DatabaseDetails.builder()
                 .dbms(DBMS.POSTGRESQL)
                 .version("16.0 (Debian 16.0-1.pgdg120+1)")
-                .users(List.of("luis", "pedro"))
+                .users(List.of("app_user", "luis", "pedro"))
                 .schemas(schemas)
                 .build()
         );
