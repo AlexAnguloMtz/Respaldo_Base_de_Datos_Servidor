@@ -1,0 +1,6 @@
+datasource:
+    postgres:
+      host: localhost
+      username: app_user
+      password: 12345
+      port: 5432
