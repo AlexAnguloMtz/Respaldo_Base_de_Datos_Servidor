@@ -1,12 +1,12 @@
 datasource:
     postgres:
-      host: localhost
-      username: app_user
-      password: 12345
-      port: 5432
+      host: ${POSTGRES_HOST}
+      username: ${POSTGRES_USER}
+      password: ${POSTGRES_PASSWORD}
+      port: ${POSTGRES_PORT}
 
     mysql:
-      host: localhost
-      username: root
-      password: root_password
-      port: 3306
+      host: ${MYSQL_HOST}
+      username: ${MYSQL_USER}
+      password: ${MYSQL_PASSWORD}
+      port: ${MYSQL_PORT}
