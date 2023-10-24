@@ -12,7 +12,7 @@ class SecurityConfiguration {
 
     @Bean
     SecurityFilterChain configure(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(request -> request.requestMatchers("/databases").permitAll());
+        http.authorizeHttpRequests(request -> request.requestMatchers("/databases/**").permitAll());
         http.csrf(AbstractHttpConfigurer::disable);
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();

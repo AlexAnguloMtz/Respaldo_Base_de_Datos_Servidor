@@ -3,31 +3,34 @@ package com.unison.backups.persistence;
 import com.unison.backups.domain.DatabaseDetails;
 import com.unison.backups.domain.DatabaseSchema;
 import com.unison.backups.enums.DBMS;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.Getter;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public abstract class DatabaseDetailsRepository {
 
+    @Getter
+    private final String databaseId;
     private final DataSource dataSource;
 
-    @Autowired
-    public DatabaseDetailsRepository(DataSource dataSource) {
+    public DatabaseDetailsRepository(String databaseId, DataSource dataSource) {
+        this.databaseId = databaseId;
         this.dataSource = dataSource;
     }
 
-    abstract List<DatabaseSchema> filterSchemas(List<DatabaseSchema> schemas);
+    protected abstract List<String> queryRoles(Connection connection);
 
-    abstract List<String> queryRoles(Connection connection);
+    protected abstract List<DatabaseSchema> querySchemas(DatabaseMetaData metaData);
+
+    protected abstract List<String> excludedSchemas();
 
     public DatabaseDetails getDetails() {
         try (Connection connection = dataSource.getConnection()) {
             DatabaseMetaData metadata = connection.getMetaData();
             return DatabaseDetails.builder()
+                .id(databaseId)
                 .dbms(DBMS.forName(metadata.getDatabaseProductName()))
                 .version(metadata.getDatabaseProductVersion())
                 .users(queryRoles(connection))
@@ -38,38 +41,14 @@ public abstract class DatabaseDetailsRepository {
         }
     }
 
-    List<DatabaseSchema> querySchemas(DatabaseMetaData metadata) {
-        try (ResultSet schemas = metadata.getSchemas()) {
-            var schemasList = new ArrayList<DatabaseSchema>();
-            while (schemas.next()) {
-                String catalogName = schemas.getString("TABLE_CATALOG");
-                String schemaName = schemas.getString("TABLE_SCHEM");
-                List<String> tableNames = queryTableNames(metadata, catalogName, schemaName);
-                schemasList.add(databaseSchema(schemas, tableNames));
-            }
-            return schemasList;
-        } catch (SQLException exception) {
-            throw new RuntimeException(exception);
-        }
+    private List<DatabaseSchema> filterSchemas(List<DatabaseSchema> schemas) {
+        return schemas.stream()
+                .filter(this::shouldIncludeSchema)
+                .toList();
     }
 
-    private DatabaseSchema databaseSchema(ResultSet row, List<String> tables) throws SQLException {
-        return DatabaseSchema.builder()
-            .name(row.getString("TABLE_SCHEM"))
-            .tables(tables)
-            .build();
-    }
-
-    List<String> queryTableNames(DatabaseMetaData metadata, String catalogName, String schemaName) throws SQLException {
-        try (ResultSet tables = metadata.getTables(catalogName, schemaName, null, new String[] { "TABLE" })) {
-            var tablesNames = new ArrayList<String>();
-            while(tables.next()) {
-                tablesNames.add(tables.getString("TABLE_NAME"));
-            }
-            return tablesNames;
-        } catch (SQLException exception) {
-            throw new RuntimeException(exception);
-        }
+    private boolean shouldIncludeSchema(DatabaseSchema schema) {
+        return ! (excludedSchemas().contains(schema.getName()));
     }
 
 }

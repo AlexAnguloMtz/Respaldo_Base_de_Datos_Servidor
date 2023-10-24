@@ -4,3 +4,9 @@ datasource:
       username: app_user
       password: 12345
       port: 5432
+
+    mysql:
+      host: localhost
+      username: root
+      password: root_password
+      port: 3306

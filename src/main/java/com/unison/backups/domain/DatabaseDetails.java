@@ -4,6 +4,7 @@ import com.unison.backups.enums.DBMS;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -12,13 +13,13 @@ import java.util.List;
 @AllArgsConstructor
 public class DatabaseDetails {
 
-    private final DBMS dbms;
-
-    private final String version;
-
-    private final List<DatabaseSchema> schemas;
-
-    private final List<String> users;
+    private String id;
+    private DBMS dbms;
+    private String version;
+    private List<DatabaseSchema> schemas;
+    private List<String> users;
+    @Setter
+    private List<DatabaseBackupDetails> backups;
 
     public String getDbms() {
         return dbms.formattedName();

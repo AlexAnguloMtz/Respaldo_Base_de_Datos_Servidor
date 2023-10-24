@@ -32,16 +32,17 @@ public class DatabaseControllerTest {
     void can_find_all_database_details() throws Exception {
         var schemas =  List.of(
             DatabaseSchema.builder()
-                .name("agencia_vehiculos")
-                .tables(List.of("proveedores"))
+                .name("restaurante")
+                .tables(List.of("almacenes"))
                 .build()
         );
 
         var expected = List.of(
             DatabaseDetails.builder()
-                .dbms(DBMS.POSTGRESQL)
-                .version("16.0 (Debian 16.0-1.pgdg120+1)")
-                .users(List.of("app_user", "luis", "pedro"))
+                .id("hello")
+                .dbms(DBMS.MYSQL)
+                .version("8.0.33")
+                .users(List.of("app_user", "root", "luis", "pedro"))
                 .schemas(schemas)
                 .build()
         );

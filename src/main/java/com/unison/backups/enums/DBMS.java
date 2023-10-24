@@ -17,7 +17,7 @@ public enum DBMS {
 
     public static DBMS forName(String name) {
         return Arrays.stream(values())
-                .filter(dbms -> dbms.formattedName().equals(name))
+                .filter(dbms -> dbms.formattedName().equalsIgnoreCase(name))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Cannot find DBMS for name %s".formatted(name)));
     }
