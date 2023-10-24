@@ -29,28 +29,11 @@ public class DatabaseControllerTest {
 
 
     @Test
-    void can_find_all_database_details() throws Exception {
-        var schemas =  List.of(
-            DatabaseSchema.builder()
-                .name("restaurante")
-                .tables(List.of("almacenes"))
-                .build()
-        );
-
-        var expected = List.of(
-            DatabaseDetails.builder()
-                .id("hello")
-                .dbms(DBMS.MYSQL)
-                .version("8.0.33")
-                .users(List.of("app_user", "root", "luis", "pedro"))
-                .schemas(schemas)
-                .build()
-        );
-
-        client.perform(get("/databases")
+    void can_get_backup_file() throws Exception {
+        client.perform(get("/databases/1/backups/3")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().json(json(expected)));
+                .andExpect(content().string("Hello world!"));
     }
 
     private String json(Object object) throws JsonProcessingException {

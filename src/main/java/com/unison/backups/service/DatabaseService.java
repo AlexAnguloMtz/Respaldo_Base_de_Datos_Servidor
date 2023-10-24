@@ -46,4 +46,8 @@ public class DatabaseService {
     public BackupCreationResponse createNewBackup(String id) {
         return databaseBackupRepository.createDatabaseBackup(id);
     }
+
+    public List<String> readBackup(String id, String backupId) {
+        return databaseBackupRepository.readBackup(id, backupId);
+    }
 }

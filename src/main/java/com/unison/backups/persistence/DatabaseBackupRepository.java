@@ -2,7 +2,9 @@ package com.unison.backups.persistence;
 
 import com.unison.backups.domain.BackupCreationResponse;
 import com.unison.backups.domain.DatabaseBackupDetails;
+import com.unison.backups.utils.SimpleFileHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
@@ -17,6 +19,9 @@ import java.util.List;
 public class DatabaseBackupRepository {
 
     private static final String TIME_STAMP_FORMAT = "yyyy-MM-dd_HH-mm-ss";
+
+    @Autowired
+    private SimpleFileHandler fileHandler;
 
     @Value("${datasource.postgres.username}")
     private String postgresUsername;
@@ -47,6 +52,10 @@ public class DatabaseBackupRepository {
             throw new RuntimeException(e);
         }
         return new BackupCreationResponse(findBackupsForDatabase(databaseId));
+    }
+
+    public List<String> readBackup(String databaseId, String backupId) {
+        return fileHandler.readAllLinesFromFile("%s/database_backups/%s/%s".formatted(currentDirectory(), databaseId, backupId));
     }
 
     private void writeInputStreamToLocalFile(Process process, String backupFileName) {
