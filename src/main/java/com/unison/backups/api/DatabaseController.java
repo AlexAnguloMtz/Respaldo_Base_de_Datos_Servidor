@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 
 @RestController
@@ -39,17 +40,12 @@ public class DatabaseController {
             @PathVariable String backupId,
             HttpServletResponse response
     ) throws IOException {
-        response.setContentType("text/plain");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/plain; charset=UTF-8");
         response.setHeader("Content-Disposition","attachment;filename=%s".formatted(backupId));
-        ServletOutputStream out = response.getOutputStream();
+        PrintWriter out = response.getWriter();
         List<String> backup = databaseService.readBackup(id, backupId);
-        backup.forEach(line -> {
-            try {
-                out.println(line);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        backup.forEach(out::println);
         out.flush();
         out.close();
     }
