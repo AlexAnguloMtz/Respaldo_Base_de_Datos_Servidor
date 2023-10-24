@@ -17,7 +17,7 @@ public class DatabaseService {
     private List<DatabaseDetailsRepository> databaseDetailsRepositories;
 
     @Autowired
-    private DatabaseBackupRepository databaseBackupRepository;
+    private List<DatabaseBackupRepository> databaseBackupRepositories;
 
     public List<DatabaseDetails> findAll() {
         return databaseDetailsRepositories.stream()
@@ -39,15 +39,22 @@ public class DatabaseService {
         return details;
     }
 
-    private List<DatabaseBackupDetails> findDatabaseBackups(String id) {
-        return databaseBackupRepository.findBackupsForDatabase(id);
+    private List<DatabaseBackupDetails> findDatabaseBackups(String databaseId) {
+        return repositoryForDatabase(databaseId).findBackupsForDatabase(databaseId);
     }
 
-    public BackupCreationResponse createNewBackup(String id) {
-        return databaseBackupRepository.createDatabaseBackup(id);
+    public BackupCreationResponse createNewBackup(String databaseId) {
+        return repositoryForDatabase(databaseId).createDatabaseBackup(databaseId);
     }
 
-    public List<String> readBackup(String id, String backupId) {
-        return databaseBackupRepository.readBackup(id, backupId);
+    public List<String> readBackup(String databaseId, String backupId) {
+        return repositoryForDatabase(databaseId).readBackup(databaseId, backupId);
+    }
+
+    private DatabaseBackupRepository repositoryForDatabase(String databaseId) {
+        return databaseBackupRepositories.stream()
+                .filter(repository -> repository.canHandleDatabase(databaseId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Invalid database id"));
     }
 }

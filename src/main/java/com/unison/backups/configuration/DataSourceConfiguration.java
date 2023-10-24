@@ -1,9 +1,8 @@
 package com.unison.backups.configuration;
 
 import com.mysql.cj.jdbc.MysqlDataSource;
-import com.unison.backups.persistence.DatabaseDetailsRepository;
-import com.unison.backups.persistence.MySQLDetailsRepository;
-import com.unison.backups.persistence.PostgresDetailsRepository;
+import com.unison.backups.persistence.*;
+import com.unison.backups.utils.SimpleFileHandler;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -33,11 +32,22 @@ class DataSourceConfiguration {
     @Value("${datasource.mysql.port}")
     private int mysqlPort;
 
+    private final String postgresDatabaseId = "database-1";
+    private final String mysqlDatabaseId = "database-2";
+
     @Bean
     List<DatabaseDetailsRepository> databaseDetailsRepositories() {
         return List.of(
-            new PostgresDetailsRepository("database-1", postgresDataSource()),
-            new MySQLDetailsRepository("database-2", mysqlDataSource())
+            new PostgresDetailsRepository(postgresDatabaseId, postgresDataSource()),
+            new MySQLDetailsRepository(mysqlDatabaseId, mysqlDataSource())
+        );
+    }
+
+    @Bean
+    List<DatabaseBackupRepository> databaseBackupRepositories() {
+        return List.of(
+            new PostgresBackupRepository(List.of(postgresDatabaseId), fileHandler(), postgresUsername),
+            new MySQLBackupRepository(List.of(mysqlDatabaseId), fileHandler(), mysqlUsername, mysqlPassword)
         );
     }
 
@@ -57,6 +67,10 @@ class DataSourceConfiguration {
         dataSource.setPassword(mysqlPassword);
         dataSource.setPort(mysqlPort);
         return dataSource;
+    }
+
+    private SimpleFileHandler fileHandler() {
+        return new SimpleFileHandler();
     }
 
 }
