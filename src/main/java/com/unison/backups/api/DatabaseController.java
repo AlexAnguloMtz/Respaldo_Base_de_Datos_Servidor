@@ -32,6 +32,7 @@ public class DatabaseController {
         return ResponseEntity.ok(databaseService.findDatabaseDetails(id, backups));
     }
 
+    // TODO Clean this mess
     @GetMapping("/{id}/backups/{backupId}")
     public void export(
             @PathVariable String id,

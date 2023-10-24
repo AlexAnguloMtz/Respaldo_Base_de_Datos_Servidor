@@ -3,85 +3,41 @@ package com.unison.backups.persistence;
 import com.unison.backups.domain.BackupCreationResponse;
 import com.unison.backups.domain.DatabaseBackupDetails;
 import com.unison.backups.utils.SimpleFileHandler;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Repository;
 
-import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
-@Repository
-public class DatabaseBackupRepository {
+public abstract class DatabaseBackupRepository {
 
     private static final String TIME_STAMP_FORMAT = "yyyy-MM-dd_HH-mm-ss";
 
     @Autowired
     private SimpleFileHandler fileHandler;
 
-    @Value("${datasource.postgres.username}")
-    private String postgresUsername;
+    abstract void doCreateBackup(String outputPath);
 
     public List<DatabaseBackupDetails> findBackupsForDatabase(String databaseId) {
         String directoryPath = "%s/database_backups/%s".formatted(currentDirectory(), databaseId);
-        return fileNamesFromDirectory(directoryPath).stream()
+        return fileHandler.fileNamesFromDirectory(directoryPath).stream()
                 .map(fileName -> new DatabaseBackupDetails(fileName, parseTimeStamp(fileName)))
                 .toList();
     }
 
     public BackupCreationResponse createDatabaseBackup(String databaseId) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(TIME_STAMP_FORMAT);
-        String dateTimeString = LocalDateTime.now().format(formatter);
-
-        var backupFileName = "%s/database_backups/%s/%s.sql".formatted(currentDirectory(), databaseId, dateTimeString);
-
-        // Communication with postgres container in the same network
-        try {
-            ProcessBuilder processBuilder = createBackupProcess();
-            Process process = processBuilder.start();
-            writeInputStreamToLocalFile(process, backupFileName);
-            int exitCode = process.waitFor();
-            if (exitCode != 0) {
-                throw new RuntimeException("Could not handle process output");
-            }
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        doCreateBackup(createBackupPath(databaseId));
         return new BackupCreationResponse(findBackupsForDatabase(databaseId));
     }
 
+    private String createBackupPath(String databaseId) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(TIME_STAMP_FORMAT);
+        String dateTimeString = LocalDateTime.now().format(formatter);
+        return "%s/database_backups/%s/%s.sql".formatted(currentDirectory(), databaseId, dateTimeString);
+    }
+
     public List<String> readBackup(String databaseId, String backupId) {
-        return fileHandler.readAllLinesFromFile("%s/database_backups/%s/%s".formatted(currentDirectory(), databaseId, backupId));
-    }
-
-    private void writeInputStreamToLocalFile(Process process, String backupFileName) {
-        try (InputStream inputStream = process.getInputStream();
-            var inputStreamReader = new InputStreamReader(inputStream);
-            var reader = new BufferedReader(inputStreamReader);
-            var fileWriter = new FileWriter(backupFileName);
-            var writer = new BufferedWriter(fileWriter)) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                writer.write(line + "\n");
-            }
-        } catch (IOException exception) {
-            throw new RuntimeException(exception);
-        }
-    }
-
-    private ProcessBuilder createBackupProcess() {
-        return new ProcessBuilder(
-                "docker",
-                "exec",
-                "postgres",
-                "pg_dumpall",
-                "-U",
-                postgresUsername
-        );
+        return fileHandler.readLines("%s/database_backups/%s/%s".formatted(currentDirectory(), databaseId, backupId));
     }
 
     LocalDateTime parseTimeStamp(String fileName) {
@@ -100,26 +56,6 @@ public class DatabaseBackupRepository {
 
     String currentDirectory() {
         return System.getProperty("user.dir");
-    }
-
-    List<String> fileNamesFromDirectory(String directoryPath) {
-        var fileNames = new ArrayList<String>();
-        File folder = new File(directoryPath);
-
-        if (folder.exists() && folder.isDirectory()) {
-            File[] files = folder.listFiles();
-
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isFile()) {
-                        fileNames.add(file.getName());
-                    }
-                }
-            }
-        } else {
-            throw new RuntimeException("The specified folder does not exist or is not a directory.");
-        }
-        return fileNames;
     }
 
 }
