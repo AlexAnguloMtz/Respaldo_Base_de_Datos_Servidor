@@ -50,6 +50,7 @@ class DataSourceConfiguration {
                     List.of(postgresDatabaseId),
                     fileHandler(),
                     postgresHost,
+                    String.valueOf(postgresPort),
                     postgresUsername,
                     postgresPassword
             ),

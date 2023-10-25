@@ -6,6 +6,7 @@ import java.util.List;
 public class PostgresBackupRepository extends DatabaseBackupRepository {
 
     private final String postgresHost;
+    private final String postgresPort;
     private final String postgresUsername;
     private final String postgresPassword;
 
@@ -13,11 +14,13 @@ public class PostgresBackupRepository extends DatabaseBackupRepository {
             List<String> databaseIds,
             SimpleFileHandler fileHandler,
             String postgresHost,
+            String postgresPort,
             String postgresUsername,
             String postgresPassword
     ) {
         super(databaseIds, fileHandler);
         this.postgresHost = postgresHost;
+        this.postgresPort = postgresPort;
         this.postgresUsername = postgresUsername;
         this.postgresPassword = postgresPassword;
     }
@@ -28,6 +31,8 @@ public class PostgresBackupRepository extends DatabaseBackupRepository {
                 "pg_dumpall",
                 "-h",
                 postgresHost,
+                "-p",
+                String.valueOf(postgresPort),
                 "-U",
                 postgresUsername
         );

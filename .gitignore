@@ -1,4 +1,7 @@
-docker-compose.yml
+.idea
+.mvn
+*.sh
+Dockerfile
 HELP.md
 target/
 !.mvn/wrapper/maven-wrapper.jar
