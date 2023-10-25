@@ -39,7 +39,7 @@ public abstract class DatabaseBackupRepository {
 
     private String createBackupPath(String databaseId) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(TIME_STAMP_FORMAT);
-        String dateTimeString = LocalDateTime.now().format(formatter);
+        String dateTimeString = LocalDateTime.now(ZoneOffset.UTC).format(formatter);
         return "%s/database_backups/%s/%s.sql".formatted(currentDirectory(), databaseId, dateTimeString);
     }
 

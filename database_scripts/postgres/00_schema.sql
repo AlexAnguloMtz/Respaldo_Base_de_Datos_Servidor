@@ -11,6 +11,14 @@ CREATE TABLE restaurante.vehiculos(
     placas VARCHAR(10) NOT NULL
 );
 
+CREATE TABLE restaurante.ingredientes (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    proveedor_id INT,
+    precio DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (proveedor_id) REFERENCES restaurante.proveedores (id)
+);
+
 CREATE SCHEMA universidad;
 
 CREATE TABLE universidad.estudiantes(
@@ -42,6 +50,22 @@ CREATE TABLE banco.transacciones(
     monto DECIMAL(10, 2) NOT NULL
 );
 
+CREATE TABLE banco.cuentas (
+    id SERIAL PRIMARY KEY,
+    cliente_id INT NOT NULL,
+    numero_cuenta VARCHAR(20) NOT NULL,
+    tipo_cuenta VARCHAR(20) NOT NULL,
+    saldo DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (cliente_id) REFERENCES banco.clientes (id)
+);
+
+CREATE TABLE banco.empleados (
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    cargo VARCHAR(50) NOT NULL,
+    fecha_contratacion DATE NOT NULL
+);
+
 CREATE SCHEMA teatro;
 
 CREATE TABLE teatro.obras(
@@ -55,6 +79,25 @@ CREATE TABLE teatro.actores(
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
     edad INT NOT NULL
+);
+
+CREATE TABLE teatro.personajes(
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    obra_id INT REFERENCES teatro.obras(id)
+);
+
+CREATE TABLE teatro.reparto(
+    id SERIAL PRIMARY KEY,
+    actor_id INT REFERENCES teatro.actores(id),
+    personaje_id INT REFERENCES teatro.personajes(id)
+);
+
+CREATE TABLE teatro.resenas(
+    id SERIAL PRIMARY KEY,
+    obra_id INT REFERENCES teatro.obras(id),
+    calificacion INT,
+    comentario TEXT
 );
 
 CREATE SCHEMA biblioteca;

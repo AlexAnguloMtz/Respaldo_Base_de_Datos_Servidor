@@ -34,6 +34,10 @@ public class DatabaseService {
                 .orElseThrow(() -> new RuntimeException("Could not find database details for id %s".formatted(id)));
     }
 
+    public BackupCreationResponse createNewBackup(String databaseId) {
+        return repositoryForDatabase(databaseId).createDatabaseBackup(databaseId);
+    }
+
     private DatabaseDetails addBackups(DatabaseDetails details) {
         details.setBackups(findDatabaseBackups(details.getId()));
         return details;
@@ -41,10 +45,6 @@ public class DatabaseService {
 
     private List<DatabaseBackupDetails> findDatabaseBackups(String databaseId) {
         return repositoryForDatabase(databaseId).findBackupsForDatabase(databaseId);
-    }
-
-    public BackupCreationResponse createNewBackup(String databaseId) {
-        return repositoryForDatabase(databaseId).createDatabaseBackup(databaseId);
     }
 
     public List<String> readBackup(String databaseId, String backupId) {
@@ -55,6 +55,6 @@ public class DatabaseService {
         return databaseBackupRepositories.stream()
                 .filter(repository -> repository.canHandleDatabase(databaseId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Invalid database id"));
+                .orElseThrow(() -> new RuntimeException("Invalid database id: %s".formatted(databaseId)));
     }
 }
