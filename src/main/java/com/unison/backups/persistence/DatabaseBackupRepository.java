@@ -54,12 +54,10 @@ public abstract class DatabaseBackupRepository {
     private void doCreateBackup(String outputPath) {
         try {
             ProcessBuilder processBuilder = createBackupProcess();
+            processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
             writeInputStreamToLocalFile(process, outputPath);
-            int exitCode = process.waitFor();
-            if (exitCode != 0) {
-                throw new RuntimeException("Could not handle process output");
-            }
+            process.waitFor();
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }

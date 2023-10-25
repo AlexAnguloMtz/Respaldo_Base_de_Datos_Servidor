@@ -46,8 +46,20 @@ class DataSourceConfiguration {
     @Bean
     List<DatabaseBackupRepository> databaseBackupRepositories() {
         return List.of(
-            new PostgresBackupRepository(List.of(postgresDatabaseId), fileHandler(), postgresUsername),
-            new MySQLBackupRepository(List.of(mysqlDatabaseId), fileHandler(), mysqlUsername, mysqlPassword)
+            new PostgresBackupRepository(
+                    List.of(postgresDatabaseId),
+                    fileHandler(),
+                    postgresHost,
+                    postgresUsername,
+                    postgresPassword
+            ),
+            new MySQLBackupRepository(
+                    List.of(mysqlDatabaseId),
+                    fileHandler(),
+                    mysqlHost,
+                    mysqlUsername,
+                    mysqlPassword
+            )
         );
     }
 
